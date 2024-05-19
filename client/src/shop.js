@@ -10,16 +10,6 @@ function Shop() {
   let total = 0;
   let tokenjwt=''
 
-  const token = () => {
-    Axios.post("http://localhost:3001/login").then((res) => {
-      tokenjwt=res.data.token;
-    }).catch((error) => {
-      console.error('Error al obtener usuarios:', error);
-      return;
-    });
-  }
-  token();
-
 
 
   const getUsers = () => {

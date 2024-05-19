@@ -1,36 +1,57 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Axios from "axios";
 import Swal from 'sweetalert2'
-import { Link } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
+
 
 function Principal() {
 
     const [listUsers, setUsers] = useState([])
+    const history = useNavigate();
+    const [allUsersLoaded, setAllUsersLoaded] = useState(false);
 
     const getUsers = () => {
-        Axios.get("http://localhost:3001/employes").then((res) => {
-            setUsers(res.data);
+
+        const storedToken = localStorage.getItem('token');
+        Axios.get("http://localhost:3001/employes", {
+            headers: {
+                Authorization: `Bearer ${storedToken}` // Agregar el token en el encabezado de autorización
+            }
+        }).then((res) => {
+            if (res.data.length === 0) {
+                setAllUsersLoaded(true);
+              } else {
+                setUsers(res.data);
+              }
         }).catch((error) => {
+            history('/sesion');
             console.error('Error al obtener usuarios:', error);
             return;
+
         });
     }
-    getUsers();
-    
+    useEffect(() => {
+        if (!allUsersLoaded) {
+            getUsers();
+        }
+    }, [allUsersLoaded]);
+
+
+
     const createPurchase = (id) => {
         Axios.post("http://localhost:3001/shop/create", {
-          id: id
+            id: id
         }).then(() => {
             Swal.fire({
-              position: "center",
-              icon: "success",
-              title: "<strong>Has been created, plis verify the shopping card or if you want continue shopping and verify later</strong>",
-              showConfirmButton: true
-              //timer: 1500
+                position: "center",
+                icon: "success",
+                title: "<strong>Has been created, plis verify the shopping card or if you want continue shopping and verify later</strong>",
+                showConfirmButton: true
+                //timer: 1500
             });
-          })
-      }
+        })
+    }
 
 
     return (
@@ -100,13 +121,13 @@ function Principal() {
                                                                       Cancel
                                                                     `,
                                                                 cancelButtonAriaLabel: "Thumbs down"
-                                                                
+
                                                             }).then((result) => {
                                                                 if (result.isConfirmed) {
                                                                     createPurchase(val.id)
-                                                                  } else if (result.isDenied) {
+                                                                } else if (result.isDenied) {
                                                                     Swal.fire("Changes are not saved", "", "info");
-                                                                  }
+                                                                }
                                                             });
                                                         }}>Buy</button>
                                                     </div>

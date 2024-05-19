@@ -34,6 +34,42 @@ app.post("/create", (req, res) => {
 
 });
 
+app.post("/createUser", (req, res) => {
+
+    const name = req.body.name;
+    const password = req.body.password;
+
+    db.query('INSERT INTO `users` (`id`, `name`, `password`) VALUES (NULL, ?, ?);', [name, password],
+        (err, resu) => {
+            if (err) {
+                console.log(err)
+            } else {
+                res.send("registed")
+            }
+
+        });
+
+
+});
+app.post("/createProduct", (req, res) => {
+
+    const image = req.body.image;
+    const description = req.body.description;
+    const price = req.body.price;
+
+    db.query('INSERT INTO `products` (`id`, `image`, `description`, `price`) VALUES (NULL, ?, ?, ?);', [image, description,price],
+        (err, resu) => {
+            if (err) {
+                console.log(err)
+            } else {
+                res.send("created")
+            }
+
+        });
+
+
+});
+
 app.post("/login", (req, res) => {
 
     const name = req.body.name;
@@ -64,24 +100,19 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/employes", (req, res) => {
-    // Obtener el token del encabezado de la solicitud
-    const token = req.headers.authorization;
-
-    // Verificar si se proporcionó un token
-    if (!token) {
-        return res.status(401).json({ error: 'Token no proporcionado' });
+    const authorizationHeader = req.headers.authorization;
+    let token=""
+    if (!authorizationHeader) {
+        return res.redirect('/login');
+        token="token"
     }
-
-    // Verificar el token
-    jwt.verify(token, 'password1234', (err, decoded) => {
+    token= authorizationHeader.split(' ')[1];
+    jwt.verify(token, 'password1234', (err, decoded) => { 
         if (err) {
-            // El token es inválido o ha expirado
-            return res.status(401).json({ error: 'Token inválido' });
+            return res.redirect('/login');
         } else {
-            // El token es válido, puedes continuar con la lógica de la ruta
 
-            // Consulta a la base de datos para obtener los empleados
-            db.query('SELECT * FROM employees', (err, result) => {
+            db.query('SELECT * FROM products', (err, result) => {
                 if (err) {
                     console.log(err);
                     return res.status(500).json({ error: 'Error al consultar la base de datos' });
@@ -93,6 +124,21 @@ app.get("/employes", (req, res) => {
     });
 });
 
+app.post("/verifyUser", (req, res) => {
+
+    const name = req.body.name;
+    const password = req.body.password;
+    db.query('SELECT users.name, users.password FROM users WHERE users.name=? AND users.password=?', [name, password],
+        (err, resu) => {
+            if (err) {
+                console.log(err)
+            } else {
+                res.send(resu);
+            }
+
+        });
+
+});
 
 app.get("/shopping", (req, res) => {
 
@@ -128,7 +174,6 @@ app.put("/admin/update", (req, res) => {
 app.delete("/delete/:id", (req, res) => {
 
     const id = req.params.id;
-    console.log(id);
 
     db.query('DELETE FROM products WHERE  id=?', id,
         (err, resu) => {

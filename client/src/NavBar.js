@@ -1,8 +1,13 @@
 import { Outlet } from "react-router-dom";
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 
 function NavBar() {
-
+  const navegate = useNavigate();
+  const clearToken = () => {
+    navegate("/sesion");
+    localStorage.removeItem('token'); // Eliminar el token de localStorage
+    console.log('Token eliminado');
+  }
 return (
     <>
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -14,16 +19,16 @@ return (
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav">
           <li className="nav-item">
-            <Link className="nav-link " aria-current="page" to="/">Inicio</Link>
+            <Link className="nav-link " aria-current="page" to="/">StartPage</Link>
           </li>
           <li className="nav-item">
           <Link className="nav-link" to="/sesion">Login</Link>
           </li>
           <li className="nav-item">
-          <Link className="nav-link" to="/admin">asd</Link>
+          <Link className="nav-link" to="/admin">Edit</Link>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="#">Pricing</a>
+            <a className="nav-link" onClick={clearToken}>logOut</a>
           </li>
         </ul>
       </div>
